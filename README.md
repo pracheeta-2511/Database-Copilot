@@ -135,10 +135,10 @@ This project demonstrates:
 
 ## Screenshots
 
-![Query Results](./screenshots/Screenshot%20(1).png)
+![Query Results](Database-Copilot/screenshots/Screenshot%20(1).png)
 
-![Home Pages](./screenshots/Screenshot%20(2).png)
+![Home Pages](Database-Copilot/screenshots/Screenshot%20(2).png)
 
-![Query History](./screenshots/Screenshot%20(3).png)
+![Query History](Database-Copilot/screenshots/Screenshot%20(3).png)
 
-![System Settings](./screenshots/Screenshot%20(4).png)
+![System Settings](Database-Copilot/screenshots/Screenshot%20(4).png)
