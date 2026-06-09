@@ -135,14 +135,10 @@ This project demonstrates:
 
 ## Screenshots
 
-### Query Results
-![Home Page](screenshots/Screenshot%20(1).png)
+![Query Results](./screenshots/Screenshot%20(1).png)
 
-### Home Page
-![Query Results](screenshots/Screenshot%20(2).png)
+![Home Pages](./screenshots/Screenshot%20(2).png)
 
-### Query History
-![Query History](screenshots/Screenshot%20(3).png)
+![Query History](./screenshots/Screenshot%20(3).png)
 
-### System Settings
-![Architecture](screenshots/Screenshot%20(4).png)
+![System Settings](./screenshots/Screenshot%20(4).png)
