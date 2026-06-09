@@ -8,7 +8,7 @@ def get_db_connection():
         host="DB_HOST",
         user="DB_USER",
         password="DB_PASSWORD",
-        database="iDB_NAME"
+        database="DB_NAME"
     )
 
 @mcp.tool()
