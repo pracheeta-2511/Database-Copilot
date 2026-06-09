@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventoryAI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="w-64 glass p-6 flex flex-col gap-8">
+        <h1 class="text-xl font-bold text-indigo-400"><i class="fas fa-database"></i> InventoryAI</h1>
+        <nav class="flex flex-col gap-4">
+            <button onclick="location.reload()" class="text-left p-2 hover:bg-white/10 rounded">
+                <i class="fas fa-home mr-2"></i> Dashboard
+            </button>
+            <button onclick="fetchHistory()" class="text-left p-2 hover:bg-white/10 rounded">
+                <i class="fas fa-history mr-2"></i> History
+            </button>
+            <button onclick="showSettings()" class="text-left p-2 hover:bg-white/10 rounded">
+                <i class="fas fa-cog mr-2"></i> Settings
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="glass p-8 rounded-2xl mb-6">
+            <h2 class="text-2xl font-bold mb-4">Ask your Data</h2>
+            <div class="flex gap-4">
+                <input type="text" id="userInp" 
+                    class="flex-1 bg-black/20 border border-white/10 p-4 rounded-xl outline-none focus:border-indigo-500" 
+                    placeholder="e.g., Which product has the highest stock?">
+                <button onclick="sendQuery()" 
+                    class="bg-indigo-600 px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition">
+                    Analyze
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass p-6 rounded-2xl">
+                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">AI Insight</h3>
+                <div id="response" class="text-lg italic text-slate-200">Waiting for query...</div>
+                <div id="sql-debug" class="mt-4 p-3 bg-black/40 rounded font-mono text-xs text-green-400 hidden"></div>
+            </div>
+            <div class="glass p-6 rounded-2xl min-h-[300px]">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass max-w-md w-full p-8 rounded-3xl shadow-2xl border border-white/20">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-indigo-400"><i class="fas fa-sliders-h mr-2"></i> System Settings</h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Database Host</label>
+                    <input type="text" value="localhost" disabled class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Database Name</label>
+                    <input type="text" value="inventory_db" disabled class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Active Model</label>
+                    <select class="w-full bg-slate-800 border border-white/10 p-3 rounded-xl text-indigo-300">
+                        <option>llama-3.1-8b-instant (Fast)</option>
+                        <option disabled>llama-3.3-70b-versatile (Smart)</option>
+                    </select>
+                </div>
+                <div class="pt-4">
+                    <div class="flex items-center gap-2 text-green-400 text-sm">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                        Database Connection: Secure & Online
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeSettings()" class="w-full mt-8 bg-indigo-600 p-3 rounded-xl font-bold hover:bg-indigo-500 transition">
+                Close Settings
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        async function sendQuery() {
+            const query = document.getElementById('userInp').value;
+            const respDiv = document.getElementById('response');
+            
+            if (!query) return;
+
+            respDiv.innerText = "Consulting AI...";
+            try {
+                const res = await fetch('/ask', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ query })
+                });
+                const data = await res.json();
+
+                respDiv.innerText = data.answer;
+                document.getElementById('sql-debug').innerText = data.sql;
+                document.getElementById('sql-debug').classList.remove('hidden');
+
+                if (data.raw_data) {
+                    updateChart(data.raw_data);
+                }
+            } catch (e) { 
+                respDiv.innerText = "Error connecting to server!"; 
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const res = await fetch('/history');
+                const data = await res.json();
+                let html = "<h3 class='font-bold mb-4'>Recent History</h3>";
+                data.forEach(h => {
+                    html += `<div class='mb-2 text-sm border-b border-white/5 pb-2'>
+                                <b>${h.time}:</b> ${h.query_text}
+                             </div>`;
+                });
+                document.getElementById('response').innerHTML = html;
+                document.getElementById('sql-debug').classList.add('hidden');
+            } catch (e) {
+                console.error("History fetch failed", e);
+            }
+        }
+
+        function showSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function updateChart(rows) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (!rows || rows.length === 0) return;
+
+            const labels = rows.map(r => r.name || Object.values(r)[0]);
+            const values = rows.map(r => r.stock_quantity || r.price || Object.values(r)[1]);
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar', 
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        label: 'Inventory Level', 
+                        data: values, 
+                        backgroundColor: '#6366f1' 
+                    }] 
+                },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
