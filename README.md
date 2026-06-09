@@ -24,20 +24,19 @@ An AI-powered database assistant that converts natural language questions into S
 ## Project Structure
 
 ```text
-Database-Copilot/
+Database-Copilot
 │
-├── app.py
-├── db_mcp_server.py
-├── inventory_db.sql
-├── requirements.txt
-├── README.md
-├── .gitignore
-│
+├── screenshots/
 ├── templates/
 │   └── index.html
 │
-└── sample_data/
-    └── Dummy Data for Data Management Testing.pdf
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── app.py
+├── db_mcp_server.py
+├── inventory_db.sql
+└── Dummy Data for Data Management Testing.pdf
 ```
 
 ## How It Works
@@ -136,14 +135,14 @@ This project demonstrates:
 
 ## Screenshots
 
-### Home Page
-
-![Home Page](screenshots/home-page.png)
-
 ### Query Results
+![Home Page](screenshots/Screenshot%20(1).png)
 
-![Query Results](screenshots/query-results.png)
+### Home Page
+![Query Results](screenshots/Screenshot%20(2).png)
 
 ### Query History
+![Query History](screenshots/Screenshot%20(3).png)
 
-![Query History](screenshots/query-history.png)
+### System Settings
+![Architecture](screenshots/Screenshot%20(4).png)
